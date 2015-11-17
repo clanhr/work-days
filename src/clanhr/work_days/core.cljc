@@ -5,17 +5,25 @@
             [clj-time.coerce :as c]
             [clj-time.core :as t]))
 
+(defn- absence-type
+  "Gets the absence type"
+  [absence]
+  (or (:absence-type absence)
+      (:type absence)))
+
 (defn- build-date
   "Creates a joda date from string"
   [absence field]
   (assoc absence field (c/from-string (field absence))))
 
-(defn- build
+(defn build
   "Prepares an absence"
   [absence]
    (cond-> absence
      (nil? (:duration-type absence)) (assoc :duration-type "days")
      (string? (:start-date absence)) (build-date :start-date)
+     (instance? java.sql.Date (:start-date absence)) (assoc :start-date (c/from-sql-date (:start-date absence)))
+     (instance? java.sql.Date (:end-date absence)) (assoc :end-date (c/from-sql-date (:end-date absence)))
      (nil? (:end-date absence)) (assoc :end-date (:start-date absence))
      (string? (:end-date absence)) (build-date :end-date)))
 
@@ -48,7 +56,7 @@
   "Gets the total vacation days on this absence"
   [settings absence]
   (let [absence (build absence)]
-    (if (= "vacations" (:absence-type absence))
+    (if (= "vacations" (absence-type absence))
       (days-interval-remove-dayoff settings absence)
       0)))
 
@@ -56,7 +64,7 @@
   "Gets the total vacation days on this absence"
   [settings absence]
   (let [absence (build absence)]
-    (if (not= "vacations" (:absence-type absence))
+    (if (not= "vacations" (absence-type absence))
       (if (= "days" (:duration-type absence))
         (* (hours-per-day settings)
            (days-interval settings absence))
@@ -66,10 +74,12 @@
 (defn calculate
   "Gets the raw duration of the absence, in days or hours, depending on the
   duration type"
-  [settings absence]
-  (let [absence (build absence)]
-    (if (= (:duration-type absence) "days")
-      (if (= (:absence-type absence) "vacations")
-        (days-interval-remove-dayoff settings absence)
-        (days-interval settings absence))
-      (:hours absence))))
+  ([absence]
+   (calculate {} absence))
+  ([settings absence]
+   (let [absence (build absence)]
+     (if (= (:duration-type absence) "days")
+       (if (= (absence-type absence) "vacations")
+         (days-interval-remove-dayoff settings absence)
+         (days-interval settings absence))
+       (:hours absence)))))
