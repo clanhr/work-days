@@ -66,10 +66,12 @@
 (defn calculate
   "Gets the raw duration of the absence, in days or hours, depending on the
   duration type"
-  [settings absence]
-  (let [absence (build absence)]
-    (if (= (:duration-type absence) "days")
-      (if (= (:absence-type absence) "vacations")
-        (days-interval-remove-dayoff settings absence)
-        (days-interval settings absence))
-      (:hours absence))))
+  ([absence]
+   (calculate {} absence))
+  ([settings absence]
+   (let [absence (build absence)]
+     (if (= (:duration-type absence) "days")
+       (if (= (:absence-type absence) "vacations")
+         (days-interval-remove-dayoff settings absence)
+         (days-interval settings absence))
+       (:hours absence)))))
