@@ -14,9 +14,10 @@
   "Prepares an absence"
   [absence]
    (cond-> absence
-     (nil? (:durarion-type absence)) (assoc :duration-type "days")
-     (string? (:end-date absence)) (build-date :end-date)
-     (string? (:start-date absence)) (build-date :start-date)))
+     (nil? (:duration-type absence)) (assoc :duration-type "days")
+     (string? (:start-date absence)) (build-date :start-date)
+     (nil? (:end-date absence)) (assoc :end-date (:start-date absence))
+     (string? (:end-date absence)) (build-date :end-date)))
 
 (defn hours-per-day
   "Gets the working hours per day"
