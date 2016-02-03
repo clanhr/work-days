@@ -47,7 +47,7 @@
 (defn work-day?
   "True if the given day is a work day, based on the settings"
   [settings day]
-  (if-let [days-off (:days-off settings)]
+  (if-let [days-off (get-in settings [:work-days :days-off])]
     (let [week-day (t/day-of-week day)]
       (not (some #{week-day} days-off)))
     (pr/weekday? day)))
