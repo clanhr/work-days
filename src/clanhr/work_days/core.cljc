@@ -44,12 +44,20 @@
   (take (days-interval settings absence)
         (p/periodic-seq (:start-date absence) (t/days 1))))
 
+(defn work-day?
+  "True if the given day is a work day, based on the settings"
+  [settings day]
+  (if-let [days-off (:days-off settings)]
+    (let [week-day (t/day-of-week day)]
+      (not (some #{week-day} days-off)))
+    (pr/weekday? day)))
+
 (defn days-interval-remove-dayoff
   "Gets the number of days between start-date and end-date, removing the
   dayoffs defined on the settings"
   [settings absence]
   (->> (absence->days-coll settings absence)
-       (filter pr/weekday?)
+       (filter (fn [day]  (work-day? settings day)))
        count))
 
 (defn total-vacation-days
