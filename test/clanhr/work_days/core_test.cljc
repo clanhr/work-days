@@ -26,7 +26,7 @@
   (let [absence {:start-date "2015-11-09"
                  :end-date "2015-11-13"
                  :absence-type "vacations"}
-        settings {:days-off []}]
+        settings {:work-days {:days-off []}}]
 
     (testing "default duration with 5 days"
       (is (= 5 (work-days/calculate settings absence)))
@@ -61,7 +61,7 @@
     (is (false? (work-days/work-day? {} sunday))))
 
   (testing "full work week"
-    (let [settings {:days-off []}]
+    (let [settings {:work-days {:days-off [1]}}]
       (is (true? (work-days/work-day? settings monday)))
       (is (true? (work-days/work-day? settings tuesday)))
       (is (true? (work-days/work-day? settings wednesday)))
@@ -71,7 +71,7 @@
       (is (true? (work-days/work-day? settings sunday)))))
 
   (testing "rest on mondays"
-    (let [settings {:days-off [1]}]
+    (let [settings {:work-days {:days-off [1]}}]
       (is (false? (work-days/work-day? settings monday)))
       (is (true? (work-days/work-day? settings tuesday)))
       (is (true? (work-days/work-day? settings wednesday)))
