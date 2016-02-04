@@ -61,7 +61,7 @@
     (is (false? (work-days/work-day? {} sunday))))
 
   (testing "full work week"
-    (let [settings {:work-days {:days-off [1]}}]
+    (let [settings {:work-days {:days-off []}}]
       (is (true? (work-days/work-day? settings monday)))
       (is (true? (work-days/work-day? settings tuesday)))
       (is (true? (work-days/work-day? settings wednesday)))
@@ -79,3 +79,24 @@
       (is (true? (work-days/work-day? settings friday)))
       (is (true? (work-days/work-day? settings saturday)))
       (is (true? (work-days/work-day? settings sunday))))))
+
+(deftest holidays
+  (let [absence {:start-date "2016-01-01"
+                 :end-date "2016-01-02"
+                 :absence-type "vacations"}
+        settings {:work-days {:days-off []
+                              :holidays [{:name "New Year"
+                                          :day "2016-01-01"
+                                          :recur true}]}}]
+
+    (testing "should not count holiday"
+      (is (= 1 (work-days/calculate settings absence)))
+      (is (= 1 (work-days/total-vacation-days settings absence))))
+
+    (testing "should count holiday from other year"
+      (let [absence {:start-date "2017-01-01"
+                     :end-date "2017-01-02"
+                     :absence-type "vacations"}]
+      (is (= 1 (work-days/calculate settings absence)))
+      (is (= 1 (work-days/total-vacation-days settings absence)))))))
+
