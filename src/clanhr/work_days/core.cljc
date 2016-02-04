@@ -44,13 +44,34 @@
   (take (days-interval settings absence)
         (p/periodic-seq (:start-date absence) (t/days 1))))
 
-(defn work-day?
-  "True if the given day is a work day, based on the settings"
+(defn regular-week-work-day?
+  "True if the given day is a rest day of the week"
   [settings day]
   (if-let [days-off (get-in settings [:work-days :days-off])]
     (let [week-day (t/day-of-week day)]
       (not (some #{week-day} days-off)))
     (pr/weekday? day)))
+
+(defn holiday-match?
+  "True if the given day matches the given holiday-data"
+  [holiday-data day]
+  (let [holiday (c/from-string (:day holiday-data))]
+    (and (= (t/day day) (t/day holiday))
+         (= (t/month day) (t/month holiday))
+         (or (:recur holiday-data)
+             (= (t/year day) (t/year holiday))))))
+
+(defn holiday?
+  "True if the given day is a holiday"
+  [settings day]
+  (when-let [holidays (get-in settings [:work-days :holidays])]
+    (some #(holiday-match? % day) holidays)))
+
+(defn work-day?
+  "True if the given day is a work day, based on the settings"
+  [settings day]
+  (and (regular-week-work-day? settings day)
+       (not (holiday? settings day))))
 
 (defn days-interval-remove-dayoff
   "Gets the number of days between start-date and end-date, removing the
