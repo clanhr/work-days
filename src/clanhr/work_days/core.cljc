@@ -87,11 +87,33 @@
        (filter (fn [day]  (work-day? settings day)))
        count))
 
+(defn get-absence-config
+  "Gets a specific absence config, for an absence, from a collection of
+  absence-configs"
+  [absence-configs absence]
+  (-> (filter #(= (absence-type absence) (:label %))
+              absence-configs)
+      first))
+
+(defn consider-absence-days-off?
+  "True if it can find settings for this absence type, and that settings
+  have consider-days-off not false"
+  [settings absence]
+  (when-let [absences-config (:absences settings)]
+    (when-let [absence-config (get-absence-config absences-config absence)]
+      (:consider-days-off absence-config))))
+
+(defn remove-days-off?
+  "True if, by the settings, we should remove days off from counting"
+  [settings absence]
+  (or (= "vacations" (absence-type absence))
+      (consider-absence-days-off? settings absence)))
+
 (defn total-vacation-days
   "Gets the total vacation days on this absence"
   [settings absence]
   (let [absence (build absence)]
-    (if (= "vacations" (absence-type absence))
+    (if (remove-days-off? settings absence)
       (days-interval-remove-dayoff settings absence)
       0)))
 
@@ -114,7 +136,7 @@
   ([settings absence]
    (let [absence (build absence)]
      (if (= (:duration-type absence) "days")
-       (if (= (absence-type absence) "vacations")
+       (if (doto (remove-days-off? settings absence))
          (days-interval-remove-dayoff settings absence)
          (days-interval settings absence))
        (:hours absence)))))

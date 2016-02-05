@@ -22,6 +22,26 @@
         (is (= 5 (work-days/calculate {} absence)))
         (is (= 5 (work-days/total-vacation-days {} absence)))))))
 
+(deftest speficic-consider-days-off-config
+  (let [absence {:start-date "2015-11-09"
+                 :end-date "2015-11-15"
+                 :absence-type "sample-type"}
+        settings-on {:work-days {:days-off [6 7]}
+                     :absences [{:label "sample-type" :consider-days-off true}]}
+        settings-off {:work-days {:days-off [6 7]}
+                      :absences [{:label "sample-type" :consider-days-off false}]}
+        settings-default {:work-days {:days-off [6 7]}
+                          :absences [{:label "sample-type"}]}]
+
+    (testing "should consider 5 work days and disrefard weekends"
+      (is (= 5 (work-days/calculate settings-on absence))))
+
+    (testing "should consider 5 work days and disrefard weekends, by default"
+      (is (= 7 (work-days/calculate settings-default absence))))
+
+    (testing "should consider 7 work days, because of consider-days-off = false"
+      (is (= 7 (work-days/calculate settings-off absence))))))
+
 (deftest full-week-work-days
   (let [absence {:start-date "2015-11-09"
                  :end-date "2015-11-13"
