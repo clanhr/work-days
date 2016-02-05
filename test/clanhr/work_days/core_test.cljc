@@ -100,3 +100,17 @@
       (is (= 1 (work-days/calculate settings absence)))
       (is (= 1 (work-days/total-vacation-days settings absence)))))))
 
+(deftest holidays-as-regular-days
+  (let [absence {:start-date "2016-01-01"
+                 :end-date "2016-01-02"
+                 :absence-type "vacations"}
+        settings {:work-days {:days-off []
+                              :work-on-holidays true
+                              :holidays [{:name "New Year"
+                                          :day "2016-01-01"
+                                          :recur true}]}}]
+
+    (testing "should not count holiday"
+      (is (= 2 (work-days/calculate settings absence)))
+      (is (= 2 (work-days/total-vacation-days settings absence))))))
+

@@ -67,11 +67,17 @@
   (when-let [holidays (get-in settings [:work-days :holidays])]
     (some #(holiday-match? % day) holidays)))
 
+(defn work-on-holidays?
+  "True if the settings state the a holiday is a work day"
+  [settings]
+  (get-in settings [:work-days :work-on-holidays]))
+
 (defn work-day?
   "True if the given day is a work day, based on the settings"
   [settings day]
   (and (regular-week-work-day? settings day)
-       (not (holiday? settings day))))
+       (or (work-on-holidays? settings)
+           (not (holiday? settings day)))))
 
 (defn days-interval-remove-dayoff
   "Gets the number of days between start-date and end-date, removing the
