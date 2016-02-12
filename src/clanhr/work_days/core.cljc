@@ -113,7 +113,7 @@
   "Gets the total vacation days on this absence"
   [settings absence]
   (let [absence (build absence)]
-    (if (remove-days-off? settings absence)
+    (if (= "vacations" (absence-type absence))
       (days-interval-remove-dayoff settings absence)
       0)))
 
