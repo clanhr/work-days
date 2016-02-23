@@ -138,3 +138,16 @@
       (is (= 2 (work-days/calculate settings absence)))
       (is (= 2 (work-days/total-vacation-days settings absence))))))
 
+(deftest count-absences-by-settings
+  (let [absence {:start-date "2016-01-01"
+                 :end-date "2016-01-02"
+                 :absence-type "something"}
+        settings {:absences [{:label "something" :consider-days-off true}]
+                  :work-days {:days-off []
+                              :holidays [{:name "New Year"
+                                          :day "2016-01-01"
+                                          :recur true}]}}]
+
+    (testing "should count holiday"
+      (is (= 8 (work-days/total-absence-hours settings absence))))))
+
