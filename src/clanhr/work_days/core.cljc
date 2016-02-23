@@ -123,8 +123,9 @@
   (let [absence (build absence)]
     (if (not= "vacations" (absence-type absence))
       (if (= "days" (:duration-type absence))
-        (* (hours-per-day settings)
-           (days-interval settings absence))
+        (if (remove-days-off? settings absence)
+          (* (hours-per-day settings) (days-interval-remove-dayoff settings absence))
+          (* (hours-per-day settings) (days-interval settings absence)))
         (:hours absence))
       0)))
 
@@ -136,7 +137,7 @@
   ([settings absence]
    (let [absence (build absence)]
      (if (= (:duration-type absence) "days")
-       (if (doto (remove-days-off? settings absence))
+       (if (remove-days-off? settings absence)
          (days-interval-remove-dayoff settings absence)
          (days-interval settings absence))
        (:hours absence)))))
