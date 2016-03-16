@@ -114,7 +114,9 @@
   [settings absence]
   (let [absence (build absence)]
     (if (= "vacations" (absence-type absence))
-      (days-interval-remove-dayoff settings absence)
+      (if (= (:duration-type absence) "partial-day")
+        (:partial-day absence)
+        (days-interval-remove-dayoff settings absence))
       0)))
 
 (defn total-absence-hours
@@ -136,8 +138,13 @@
    (calculate {} absence))
   ([settings absence]
    (let [absence (build absence)]
-     (if (= (:duration-type absence) "days")
-       (if (remove-days-off? settings absence)
-         (days-interval-remove-dayoff settings absence)
-         (days-interval settings absence))
-       (:hours absence)))))
+     (cond (= (:duration-type absence) "days")
+           (if (remove-days-off? settings absence)
+             (days-interval-remove-dayoff settings absence)
+             (days-interval settings absence))
+
+           (= (:duration-type absence) "partial-day")
+           (:partial-day absence)
+
+          :else
+          (:hours absence)))))
