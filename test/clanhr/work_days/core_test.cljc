@@ -162,3 +162,10 @@
       (is (= 0.5 (work-days/calculate {} absence)))
       (is (= 0.5 (work-days/total-vacation-days {} absence))))))
 
+(deftest several-format-dates
+  (let [absence {:start-date "09-11-2015"
+                 :end-date "2015-11-09"
+                 :absence-type "vacations"}]
+
+      (is (= 1 (work-days/calculate {} absence)))
+      (is (= 1 (work-days/total-vacation-days {} absence)))))

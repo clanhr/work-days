@@ -3,7 +3,12 @@
   (:require [clj-time.periodic :as p]
             [clj-time.predicates :as pr]
             [clj-time.coerce :as c]
+            [clj-time.format :as f]
             [clj-time.core :as t]))
+
+(def multi-parser (f/formatter (t/default-time-zone)
+                               "YYYY-MM-dd"
+                               "dd-MM-YYYY"))
 
 (defn- absence-type
   "Gets the absence type"
@@ -11,10 +16,16 @@
   (or (:absence-type absence)
       (:type absence)))
 
+(defn- parse-date
+  "Parses from a string to a date"
+  [raw]
+  (or (c/from-string raw)
+      (f/parse multi-parser raw)))
+
 (defn- build-date
-  "Creates a joda date from string"
+  "Creates a joda date from string and addds it to the absence"
   [absence field]
-  (assoc absence field (c/from-string (field absence))))
+  (assoc absence field (parse-date (field absence))))
 
 (defn build
   "Prepares an absence"
@@ -55,7 +66,7 @@
 (defn holiday-match?
   "True if the given day matches the given holiday-data"
   [holiday-data day]
-  (let [holiday (c/from-string (:day holiday-data))]
+  (let [holiday (parse-date (:day holiday-data))]
     (and (= (t/day day) (t/day holiday))
          (= (t/month day) (t/month holiday))
          (or (:recur holiday-data)
