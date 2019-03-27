@@ -1,4 +1,4 @@
-(defproject clanhr/work-days "0.10.0"
+(defproject clanhr/work-days "0.10.1"
   :description "Work days calculation"
   :url "https://github.com/clanhr/work-days"
   :dependencies [[org.clojure/clojure "1.8.0"]
