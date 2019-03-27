@@ -131,7 +131,7 @@
       0)))
 
 (defn total-absence-hours
-  "Gets the total vacation days on this absence"
+  "Gets the total absence days/hours/partial-day on this absence"
   [settings absence]
   (let [absence (build absence)]
     (if (not= "vacations" (absence-type absence))
@@ -139,7 +139,9 @@
         (if (remove-days-off? settings absence)
           (* (hours-per-day settings) (days-interval-remove-dayoff settings absence))
           (* (hours-per-day settings) (days-interval settings absence)))
-        (:hours absence))
+        (if (= "partial-day" (:duration-type absence))
+          (:partial-day absence)
+          (:hours absence)))
       0)))
 
 (defn calculate

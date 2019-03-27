@@ -162,6 +162,17 @@
       (is (= 0.5 (work-days/calculate {} absence)))
       (is (= 0.5 (work-days/total-vacation-days {} absence))))))
 
+(deftest half-absence-days
+  (let [absence {:start-date "2015-11-09"
+                 :end-date "2015-11-09"
+                 :absence-type "medical"
+                 :duration-type "partial-day"
+                 :partial-day 0.5}]
+
+    (testing "should consider half days"
+      (is (= 0.5 (work-days/calculate {} absence)))
+      (is (= 0.5 (work-days/total-absence-hours {} absence))))))
+
 (deftest several-format-dates
   (let [absence {:start-date "09-11-2015"
                  :end-date "2015-11-09"
