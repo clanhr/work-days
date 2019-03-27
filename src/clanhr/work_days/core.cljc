@@ -43,6 +43,11 @@
   [settings]
   (or (:hours-per-day settings) 8))
 
+(defn hours-in-half-day
+  "Gets the number of hours for a half working day"
+  [settings]
+  (/ (hours-per-day settings) 2))
+
 (defn days-interval
   "Gets the number of days between start-date and end-date"
   [settings absence]
@@ -140,7 +145,7 @@
           (* (hours-per-day settings) (days-interval-remove-dayoff settings absence))
           (* (hours-per-day settings) (days-interval settings absence)))
         (if (= "partial-day" (:duration-type absence))
-          (:partial-day absence)
+          (hours-in-half-day settings)
           (:hours absence)))
       0)))
 
@@ -157,7 +162,9 @@
              (days-interval settings absence))
 
            (= (:duration-type absence) "partial-day")
-           (:partial-day absence)
-
+           (if (= "vacations" (absence-type absence))
+             (:partial-day absence)
+             (hours-in-half-day settings))
+           
           :else
           (:hours absence)))))

@@ -170,8 +170,8 @@
                  :partial-day 0.5}]
 
     (testing "should consider half days"
-      (is (= 0.5 (work-days/calculate {} absence)))
-      (is (= 0.5 (work-days/total-absence-hours {} absence))))))
+      (is (= 4 (work-days/calculate {} absence)))
+      (is (= 4 (work-days/total-absence-hours {} absence))))))
 
 (deftest several-format-dates
   (let [absence {:start-date "09-11-2015"
