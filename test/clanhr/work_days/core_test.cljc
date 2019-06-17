@@ -180,3 +180,59 @@
 
       (is (= 1 (work-days/calculate {} absence)))
       (is (= 1 (work-days/total-vacation-days {} absence)))))
+
+(deftest remove-vacation-days
+  (let [absence {:start-date "2019-06-17"
+                 :end-date "2019-06-21"
+                 :absence-type "vacations"
+                 :duration-type "days"
+                 :duration 5}]
+
+    (testing "should remove 5 days"
+      (is (= 5 (work-days/calculate {} absence)))
+      (is (= 5 (work-days/remove-vacation-days absence))))))
+
+(deftest remove-vacation-days-partial-day
+  (let [absence {:start-date "2019-06-17"
+                 :end-date "2019-06-17"
+                 :absence-type "vacations"
+                 :duration-type "partial-day"
+                 :partial-day 0.5}]
+
+    (testing "should remove half day"
+      (is (= 0.5 (work-days/calculate {} absence)))
+      (is (= 0.5 (work-days/remove-vacation-days absence))))))
+
+(deftest remove-absence-days
+  (let [absence {:start-date "2019-06-17"
+                 :end-date "2019-06-18"
+                 :absence-type "medical"
+                 :duration-type "days"
+                 :duration 2}]
+
+    (testing "should remove 16 hours (2 days)"
+      (is (= 2 (work-days/calculate {} absence)))
+      (is (= (* 8 2) (work-days/remove-absence-hours {} absence))))))
+
+(deftest remove-absence-partial-day
+  (let [absence {:start-date "2019-06-17"
+                 :end-date "2019-06-17"
+                 :absence-type "medical"
+                 :duration-type "partial-day"
+                 :duration 4}]
+
+    (testing "should remove 4 hours (half day)"
+      (is (= 4 (work-days/calculate {} absence)))
+      (is (= 4 (work-days/remove-absence-hours {} absence))))))
+
+(deftest remove-absence-hours
+  (let [absence {:start-date "2019-06-17"
+                 :end-date "2019-06-17"
+                 :absence-type "medical"
+                 :duration-type "hours"
+                 :hours 3
+                 :duration 3}]
+
+    (testing "should remove 3 hours"
+      (is (= 3 (work-days/calculate {} absence)))
+      (is (= 3 (work-days/remove-absence-hours {} absence))))))

@@ -149,6 +149,26 @@
           (:hours absence)))
       0)))
 
+(defn remove-vacation-days
+  "Gets vacation days based on the duration of the absence"
+  [absence]
+  (let [absence (build absence)]
+    (if (= "vacations" (absence-type absence))
+      (if (= (:duration-type absence) "partial-day")
+        (:partial-day absence)
+        (:duration absence))
+      0)))
+
+(defn remove-absence-hours
+  "Gets the total absence hours on this absence based on the duration"
+  [settings absence]
+  (let [absence (build absence)]
+    (if (not= "vacations" (absence-type absence))
+      (if (= "days" (:duration-type absence))
+        (* (hours-per-day settings) (:duration absence))
+        (:duration absence))
+      0)))
+
 (defn calculate
   "Gets the raw duration of the absence, in days or hours, depending on the
   duration type"
